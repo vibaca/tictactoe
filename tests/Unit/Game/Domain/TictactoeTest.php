@@ -13,7 +13,6 @@ class TictactoeTest extends TestCase
 {
     public function testSuccesfullyStartedGame(): void
     {
-
         $gameId = new GameId("1");
         $defiantId = new playerId("Player1");
         $opponentId = new playerId("Player2");
