@@ -16,7 +16,7 @@ class TictactoeTest extends TestCase
         $gameId = new GameId("1");
         $defiantId = new playerId("Player1");
         $opponentId = new playerId("Player2");
-        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+        $game = Tictactoe::start($gameId, $defiantId, $opponentId);
 
         self::assertEmpty($game->movements());
     }
@@ -27,7 +27,7 @@ class TictactoeTest extends TestCase
         $gameId = new GameId("2");
         $defiantId = new playerId("Player1");
         $opponentId = new playerId("Player2");
-        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+        $game = Tictactoe::start($gameId, $defiantId, $opponentId);
 
         $game->move($defiantId, 7);
         $game->move($opponentId, 6);
@@ -40,7 +40,7 @@ class TictactoeTest extends TestCase
         $gameId = new GameId("3");
         $defiantId = new playerId("Player1");
         $opponentId = new playerId("Player2");
-        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+        $game = Tictactoe::start($gameId, $defiantId, $opponentId);
 
         $game->move($defiantId, 1);
         $game->move($opponentId, 2);
@@ -52,7 +52,7 @@ class TictactoeTest extends TestCase
         $gameId = new GameId("4");
         $defiantId = new playerId("Player1");
         $opponentId = new playerId("Player2");
-        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+        $game = Tictactoe::start($gameId, $defiantId, $opponentId);
 
         $game->move($defiantId, 1);
         $game->move($opponentId, 4);
@@ -68,7 +68,7 @@ class TictactoeTest extends TestCase
         $gameId = new GameId("5");
         $defiantId = new playerId("Player1");
         $opponentId = new playerId("Player2");
-        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+        $game = Tictactoe::start($gameId, $defiantId, $opponentId);
 
         $game->move($defiantId, 4);
         $game->move($opponentId, 1);
@@ -85,7 +85,7 @@ class TictactoeTest extends TestCase
         $gameId = new GameId("6");
         $defiantId = new playerId("Player1");
         $opponentId = new playerId("Player2");
-        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+        $game = Tictactoe::start($gameId, $defiantId, $opponentId);
 
         $game->move($defiantId, 4);
         $game->move($opponentId, 1);
@@ -103,7 +103,7 @@ class TictactoeTest extends TestCase
         $gameId = new GameId("7");
         $defiantId = new playerId("Player1");
         $opponentId = new playerId("Player2");
-        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+        $game = Tictactoe::start($gameId, $defiantId, $opponentId);
 
         $game->move($defiantId, 1);
         $game->move($opponentId, 2);
