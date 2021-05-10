@@ -4,6 +4,8 @@ namespace Test\Unit\Game\Domain;
 
 use App\Game\Domain\CannotMoveIntoSamePosition;
 use App\Game\Domain\CannotMoveWhenIsNotTurn;
+use App\Game\Domain\GameId;
+use App\Game\Domain\playerId;
 use PHPUnit\Framework\TestCase;
 use App\Game\Domain\Tictactoe;
 
@@ -11,71 +13,110 @@ class TictactoeTest extends TestCase
 {
     public function testSuccesfullyStartedGame(): void
     {
-        $tictactoe = new Tictactoe();
-        $tictactoe->startGame("1", "Player1", "Player2");
 
-        self::assertEmpty($tictactoe->movements());
+        $gameId = new GameId("1");
+        $defiantId = new playerId("Player1");
+        $opponentId = new playerId("Player2");
+        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+
+        self::assertEmpty($game->movements());
     }
 
-    public function testFailWhenMoveIsNotTurn(): void
+    public function testFailsWhenIsNotTurn(): void
     {
         $this->expectException(CannotMoveWhenIsNotTurn::class);
-        $tictactoe = new Tictactoe();
-        $tictactoe->startGame("1", "Player1", "Player2");
+        $gameId = new GameId("2");
+        $defiantId = new playerId("Player1");
+        $opponentId = new playerId("Player2");
+        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
 
-        $tictactoe->movementGame("1", "Player1", 1);
-        $tictactoe->movementGame("1", "Player2", 2);
-        $tictactoe->movementGame("1", "Player2", 3);
+        $game->move($defiantId, 7);
+        $game->move($opponentId, 6);
+        $game->move($opponentId, 5);
     }
 
-    public function testFailWhenMoveIsTheSame(): void
+    public function testFailsWithRepeatedPosition(): void
     {
         $this->expectException(CannotMoveIntoSamePosition::class);
-        $tictactoe = new Tictactoe();
-        $tictactoe->startGame("1", "Player1", "Player2");
+        $gameId = new GameId("3");
+        $defiantId = new playerId("Player1");
+        $opponentId = new playerId("Player2");
+        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
 
-        $tictactoe->movementGame("1", "Player1", 1);
-        $tictactoe->movementGame("1", "Player2", 2);
-        $tictactoe->movementGame("1", "Player1", 2);
-    }
-
-    public function testWinnerOpponent(): void
-    {
-        $tictactoe = new Tictactoe();
-        $tictactoe->startGame("1", "Player1", "Player2");
-
-        $tictactoe->movementGame("1", "Player1", 1);
-        $tictactoe->movementGame("2", "Player2", 4);
-        $tictactoe->movementGame("3", "Player1", 2);
-        $tictactoe->movementGame("4", "Player2", 5);
-        $tictactoe->movementGame("5", "Player1", 3);
+        $game->move($defiantId, 1);
+        $game->move($opponentId, 2);
+        $game->move($defiantId, 2);
     }
 
     public function testWinnerDefiant(): void
     {
-        $tictactoe = new Tictactoe();
-        $tictactoe->startGame("1", "Player1", "Player2");
+        $gameId = new GameId("4");
+        $defiantId = new playerId("Player1");
+        $opponentId = new playerId("Player2");
+        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
 
-        $tictactoe->movementGame("1", "Player1", 4);
-        $tictactoe->movementGame("2", "Player2", 1);
-        $tictactoe->movementGame("3", "Player1", 5);
-        $tictactoe->movementGame("4", "Player2", 2);
-        $tictactoe->movementGame("5", "Player1", 7);
-        $tictactoe->movementGame("5", "Player2", 3);
+        $game->move($defiantId, 1);
+        $game->move($opponentId, 4);
+        $game->move($defiantId, 2);
+        $game->move($opponentId, 5);
+        $game->move($defiantId, 3);
+
+        self::assertEquals($game->winner(), $defiantId);
+    }
+
+    public function testWinnerOpponent(): void
+    {
+        $gameId = new GameId("5");
+        $defiantId = new playerId("Player1");
+        $opponentId = new playerId("Player2");
+        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+
+        $game->move($defiantId, 4);
+        $game->move($opponentId, 1);
+        $game->move($defiantId, 5);
+        $game->move($opponentId, 2);
+        $game->move($defiantId, 7);
+        $game->move($opponentId, 3);
+
+        self::assertEquals($game->winner(), $opponentId);
     }
 
     public function testFinishedGame(): void
     {
-        $tictactoe = new Tictactoe();
-        $tictactoe->startGame("1", "Player1", "Player2");
+        $gameId = new GameId("6");
+        $defiantId = new playerId("Player1");
+        $opponentId = new playerId("Player2");
+        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
 
-        $tictactoe->movementGame("1", "Player1", 4);
-        $tictactoe->movementGame("2", "Player2", 1);
-        $tictactoe->movementGame("3", "Player1", 5);
-        $tictactoe->movementGame("4", "Player2", 2);
-        $tictactoe->movementGame("5", "Player1", 7);
-        $tictactoe->movementGame("5", "Player2", 3);
+        $game->move($defiantId, 4);
+        $game->move($opponentId, 1);
+        $game->move($defiantId, 5);
+        $game->move($opponentId, 2);
+        $game->move($defiantId, 7);
+        $game->move($opponentId, 3);
 
-        self::assertTrue($tictactoe->finishedGame());
+        self::assertTrue($game->isFinished());
+        self::assertNotNull($game->winner());
+    }
+
+    public function testisTieGame(): void
+    {
+        $gameId = new GameId("7");
+        $defiantId = new playerId("Player1");
+        $opponentId = new playerId("Player2");
+        $game = Tictactoe::startGame($gameId, $defiantId, $opponentId);
+
+        $game->move($defiantId, 1);
+        $game->move($opponentId, 2);
+        $game->move($defiantId, 3);
+        $game->move($opponentId, 6);
+        $game->move($defiantId, 4);
+        $game->move($opponentId, 7);
+        $game->move($defiantId, 5);
+        $game->move($opponentId, 9);
+        $game->move($defiantId, 8);
+
+        self::assertNull($game->winner());
+        self::assertTrue($game->isTie());
     }
 }

@@ -2,23 +2,23 @@
 
 namespace App\Game\Domain;
 
-class Player implements User
+class Player
 {
     private $id;
     private $name;
 
-    public function create(string $id, string $name): void
+    public function __construct($id, $name)
     {
         $this->id = $id;
         $this->name = $name;
     }
 
-    public function delete(string $id): void
+    public static function create(playerId $id, string $name): Player
     {
-        // unset();
+        return new self($id, $name);
     }
 
-    public function id(): string
+    public function id(): playerId
     {
         return $this->id;
     }

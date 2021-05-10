@@ -4,7 +4,11 @@ namespace App\Game\Domain;
 
 interface Game
 {
-    public function startGame(string $id, string $defiant, string $opponent): void;
+    public static function startGame(GameId $id, playerId $defiant, playerId $opponent): Game;
 
-    public function finishGame(): void;
+    public function finish(?playerId $winner): void;
+
+    public function winner(): ?playerId;
+
+    public function isTie(): bool;
 }

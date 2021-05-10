@@ -1,158 +1,147 @@
 <?php
 
 namespace App\Game\Domain;
-use App\Game\Domain\Game;
-use App\Game\Domain\Player;
-use App\Game\Domain\CannotMoveWhenIsNotTurn;
-use App\Game\Domain\CannotMoveIntoSamePosition;
 
 include('Game.php');
 include('Movement.php');
-include('Player.php');
 
 class Tictactoe implements Game
 {
     private $id;
     private $defiantId;
     private $opponentId;
-    private $startedGame;
-    private $finishedGame;
+    /** @var Movement[] */
     private $movements;
+    private $lastPlayer;
+    private $winner;
+    private $isTie;
+    private $winnerLines;
 
-    public function startGame(string $id,  string $defiantId, string $opponentId): void
+    private function __construct(GameId $id, playerId $defiantId, playerId $opponentId)
     {
         $this->id = $id;
         $this->defiantId = $defiantId;
         $this->opponentId = $opponentId;
-        $this->startedGame = true;
         $this->movements = [];
+        $this->winner = null;
+        $this->isTie = false;
+
+        $this->winnerLines[] = [1, 2, 3];
+        $this->winnerLines[] = [4, 5, 6];
+        $this->winnerLines[] = [7, 8, 9];
+        $this->winnerLines[] = [1, 4, 7];
+        $this->winnerLines[] = [2, 5, 8];
+        $this->winnerLines[] = [3, 6, 9];
+        $this->winnerLines[] = [1, 5, 9];
+        $this->winnerLines[] = [3, 5, 7];
+
     }
 
-    public function finishGame(): void
+    public static function startGame(GameId $id, playerId $defiantId, playerId $opponentId): Game
     {
-        $this->finishedGame = true;
+        return new self($id, $defiantId, $opponentId);
     }
 
     /**
      * @throws \App\Game\Domain\CannotMoveWhenIsNotTurn
      * @throws \App\Game\Domain\CannotMoveIntoSamePosition
      */
-    public function movementGame(string $moveId, string $player, int $move): void
+    public function move(playerId $playerId, int $position): void
     {
-        if($this->movements) {
-            $this->turn($player);
-            $this->move($move);
+        if ($this->movements) {
+            $this->ensureValidTurn($playerId);
+            $this->ensureValidMove($position);
         }
 
-        $movement = new Movement($moveId, $player, $move);
-        $this->movements[$moveId] = $movement;
+        $movement = new Movement($playerId, $position);
+        $this->movements[$position] = $movement;
+        $this->lastPlayer = $playerId;
 
-        $winner = $this->winner();
-
-        if($winner)
-        {
-            $this->finishGame();
+        if (count($this->movements) > 4) {
+            $winner = $this->winner();
+            if ($winner) {
+                $this->finish($winner);
+            }
         }
 
-        echo $winner;
+        if (count($this->movements) == 9) {
+            $this->finish(null);
+        }
     }
 
-    public function winnerMovements(): array
+    public function finish(?playerId $winner): void
     {
-        //$winnerMovements = [[1,2,3],[4,5,6],[7,8,9],[1,4,7],[2,5,8],[3,6,9],[1,5,9],[3,5,7]];
-        $winnerMovements[0] = [1,2,3];
-        $winnerMovements[1] = [4,5,6];
-        $winnerMovements[2] = [7,8,9];
-        $winnerMovements[3] = [1,4,7];
-        $winnerMovements[4] = [2,5,8];
-        $winnerMovements[5] = [3,6,9];
-        $winnerMovements[6] = [1,5,9];
-        $winnerMovements[7] = [3,5,7];
+        if ($winner) {
+            $this->winner = $winner;
+            $this->isTie = false;
+            return;
+        }
 
-        return $winnerMovements;
+        $this->isTie = true;
     }
 
-    public function winner(): ?string
+    public function winnerLines(): array
     {
-        $winnerMovements = $this->winnerMovements();
-        $movements = $this->movements;
+        return $this->winnerLines;
+    }
 
-        foreach ($winnerMovements as $winnerMove) {
-            $winnerX = 0;
-            $winnerY = 0;
-            foreach ($winnerMove as $win) {
-                foreach ($movements as $movement) {
-                    $move = $movement->move();
-
-                    if ($win == $move) {
-                        $player = $movement->player();
-                        if ($player == $this->defiantId()) {
-                            $winnerX += 1;
-                        }
-                        if ($player == $this->opponentId()) {
-                            $winnerY += 1;
-                        }
-
-                        if($winnerX == 3) {
-                            return "The winner is: " . $this->defiantId();
-                        }
-
-                        if($winnerY == 3) {
-                            return "The winner is: " . $this->opponentId();
-                        }
-                    }
-                }
+    public function winner(): ?playerId
+    {
+        foreach ($this->winnerLines() as $line) {
+            $movementA = $this->movements[$line[0]];
+            $movementB = $this->movements[$line[1]];
+            $movementC = $this->movements[$line[2]];
+//            if ($movementA->player()->equals($movementB->player()) && $movementA->player()->equals($movementC->player())){
+            if ($movementA && $movementB && $movementC
+                && $movementA->player() == $movementB->player()
+                && $movementA->player() == $movementC->player()
+            ) {
+                $this->finish($movementA->player());
+                return $this->winner;
             }
         }
 
         return null;
     }
 
-    public function turn($player): void
+    public function ensureValidTurn(playerId $player): void
     {
-        foreach($this->movements as $movement) {
-            $lastPlayer = $movement->player();
-        }
-
-        if($player == $lastPlayer)
-        {
+        if ($player == $this->lastPlayer) {
             throw new CannotMoveWhenIsNotTurn($player);
         }
     }
 
-    public function move($move): void
+    public function ensureValidMove(int $move): void
     {
-        foreach($this->movements as $Movement) {
-            if($move == $Movement->move())
-            {
-                throw new CannotMoveIntoSamePosition($move);
-            }
+        $position = $this->movements[$move];
+        if($position) {
+            throw new CannotMoveIntoSamePosition($move);
         }
     }
 
-    public function id(): string
+    public function id(): gameId
     {
         return $this->id;
     }
 
-    public function defiantId(): string
+    public function defiantId(): playerId
     {
         return $this->defiantId;
     }
 
-    public function opponentId(): string
+    public function opponentId(): playerId
     {
         return $this->opponentId;
     }
 
-    public function startedGame(): bool
+    public function isFinished(): bool
     {
-        return $this->startedGame;
+        return $this->isTie || $this->winner != null;
     }
 
-    public function finishedGame(): bool
+    public function isTie(): bool
     {
-        return $this->finishedGame;
+        return $this->isTie;
     }
 
     public function movements(): array
@@ -160,11 +149,3 @@ class Tictactoe implements Game
         return $this->movements;
     }
 }
-
-//$game = new Tictactoe();
-//$player = new Player();
-//
-//$game->startGame("1", "Player1", "Player2");
-//$game->finishGame();
-//$game->movementGame(1, "Player1", 1);
-//$game->movementGame(2, "Player2", 2);

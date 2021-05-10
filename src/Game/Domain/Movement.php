@@ -4,31 +4,21 @@ namespace App\Game\Domain;
 
 class Movement
 {
-    private $moveId;
     private $player;
-    private $move;
+    private $position;
 
-    public function __construct($moveId, $player, $move){
-        $this->moveId = $moveId;
+    public function __construct(playerId $player, int $move){
         $this->player = $player;
-        $this->move = $move;
+        $this->position = $move;
     }
 
-    public function moveId(): string
-    {
-        return $this->moveId;
-    }
-
-    public function player():string
+    public function player(): playerId
     {
         return $this->player;
     }
 
-    public function move(): int
+    public function position(): int
     {
-        return $this->move;
+        return $this->position;
     }
-
-
-
 }
