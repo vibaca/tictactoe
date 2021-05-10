@@ -37,7 +37,7 @@ class Tictactoe implements Game
 
     }
 
-    public static function startGame(GameId $id, playerId $defiantId, playerId $opponentId): Game
+    public static function start(GameId $id, playerId $defiantId, playerId $opponentId): Game
     {
         return new self($id, $defiantId, $opponentId);
     }
