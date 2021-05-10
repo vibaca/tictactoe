@@ -91,10 +91,10 @@ class Tictactoe implements Game
             $movementA = $this->movements[$line[0]];
             $movementB = $this->movements[$line[1]];
             $movementC = $this->movements[$line[2]];
-//            if ($movementA->player()->equals($movementB->player()) && $movementA->player()->equals($movementC->player())){
+
             if ($movementA && $movementB && $movementC
-                && $movementA->player() == $movementB->player()
-                && $movementA->player() == $movementC->player()
+                && $movementA->player() === $movementB->player()
+                && $movementA->player() === $movementC->player()
             ) {
                 $this->finish($movementA->player());
                 return $this->winner;
