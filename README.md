@@ -1,10 +1,13 @@
 # titactoe
 
+### Requirements
+Docker
+
 ### Install
-composer require phpunit/phpunit --dev
-composer dump autoload
+docker compose up -d
+make composer-install
 
 ### Test
-./vendor/bin/phpunit tests
+make phpunit
 
 
