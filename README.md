@@ -10,4 +10,8 @@ Docker
 ### Test
 ```make phpunit```
 
+### swagger
+```http://localhost:8081/swagger```
 
+### EndPoints
+GET /games
